@@ -510,11 +510,11 @@ main() {
       ;;
     *)
       # Instalación completa
-      #check_prerequisites
-      #setup_gke_cluster
-      #build_and_push_images
-      #deploy_otel_stack
-      #install_chaos_mesh
+      check_prerequisites
+      setup_gke_cluster
+      build_and_push_images
+      deploy_otel_stack
+      install_chaos_mesh
       install_litmus_chaos
       generate_baseline_traffic
       run_chaos_mesh_experiments

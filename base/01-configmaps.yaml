@@ -13,8 +13,8 @@ metadata:
 data:
   ENVIRONMENT:                  "production"
   CLOUD_PROVIDER:               "gcp"
-  CLOUD_REGION:                 "us-central1"
-  GCP_PROJECT_ID:               "cicdtraining-498421"
+  CLOUD_REGION:                 "us-east1"
+  GCP_PROJECT_ID:               "mas-obap20264-otellabs"
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-svc:4317"
   DATABASE_URL:                 "postgresql://app:secret@postgres-svc:5432/appdb"
   SERVICE_B_URL:                "http://service-b-svc:8001"

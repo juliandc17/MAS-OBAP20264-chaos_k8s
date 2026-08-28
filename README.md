@@ -82,7 +82,7 @@ docker --version    # Docker Desktop
 # 2. Autenticación GCP
 gcloud auth login
 gcloud auth application-default login
-gcloud config set project cicdtraining-498421
+gcloud config set project mas-obap20264-otellabs
 ```
 
 ---
@@ -95,7 +95,7 @@ chmod +x scripts/setup.sh
 ```
 
 El script ejecuta en orden:
-1. Crea el cluster GKE `otel-lab-chaos` en us-central1
+1. Crea el cluster GKE `otel-lab-chaos` en us-east1
 2. Construye y publica las imágenes en GCR
 3. Despliega el stack OTel base
 4. Instala Chaos Mesh via Helm
@@ -229,7 +229,7 @@ kubectl delete -f https://litmuschaos.github.io/litmus/litmus-operator-v3.8.0.ya
 
 # Eliminar el cluster GKE (¡cuidado!)
 gcloud container clusters delete otel-lab-chaos \
-  --region=us-central1 --project=cicdtraining-498421
+  --region=us-east1 --project=mas-obap20264-otellabs
 ```
 
 ---

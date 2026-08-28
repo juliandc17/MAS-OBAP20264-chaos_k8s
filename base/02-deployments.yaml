@@ -216,7 +216,7 @@ spec:
     spec:
       containers:
         - name: service-a
-          image: gcr.io/cicdtraining-498421/service-a:1.0.0
+          image: gcr.io/mas-obap20264-otellabs/service-a:1.0.0
           ports:
             - containerPort: 8000
               name: http
@@ -293,7 +293,7 @@ spec:
     spec:
       containers:
         - name: service-b
-          image: gcr.io/cicdtraining-498421/service-b:1.0.0
+          image: gcr.io/mas-obap20264-otellabs/service-b:1.0.0
           ports:
             - containerPort: 8001
               name: http
@@ -365,7 +365,7 @@ spec:
     spec:
       containers:
         - name: data-service
-          image: gcr.io/cicdtraining-498421/data-service:1.0.0
+          image: gcr.io/mas-obap20264-otellabs/data-service:1.0.0
           ports:
             - containerPort: 8002
               name: http

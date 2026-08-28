@@ -21,9 +21,9 @@ set -euo pipefail
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'
 
-GCP_PROJECT="cicdtraining-498421"
-GCP_REGION="us-central1-a"
-CLUSTER_NAME="otel-lab-chaos"
+GCP_PROJECT="mas-obap20264-otellabs"
+GCP_REGION="us-east1"
+CLUSTER_NAME="otel-lab"
 NAMESPACE="otel-lab"
 
 log()  { echo -e "${BLUE}[$(date +%H:%M:%S)]${NC} $1"; }
@@ -58,12 +58,12 @@ setup_gke_cluster() {
   gcloud config set project $GCP_PROJECT
 
   if gcloud container clusters describe $CLUSTER_NAME \
-     --zone=$GCP_REGION &>/dev/null 2>&1; then
+     --region=$GCP_REGION &>/dev/null 2>&1; then
     warn "Cluster $CLUSTER_NAME ya existe — conectando..."
   else
     log "Creando cluster GKE $CLUSTER_NAME..."
     gcloud container clusters create $CLUSTER_NAME \
-      --zone=$GCP_REGION \
+      --region=$GCP_REGION \
       --num-nodes=3 \
       --machine-type=e2-standard-4 \
       --enable-autoscaling \
@@ -78,7 +78,7 @@ setup_gke_cluster() {
 
   # Obtener credenciales
   gcloud container clusters get-credentials $CLUSTER_NAME \
-    --zone=$GCP_REGION --project=$GCP_PROJECT
+    --region=$GCP_REGION --project=$GCP_PROJECT
   ok "kubectl configurado para $CLUSTER_NAME"
 }
 

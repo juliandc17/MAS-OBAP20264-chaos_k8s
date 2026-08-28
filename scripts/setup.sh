@@ -22,7 +22,7 @@ RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'
 
 GCP_PROJECT="mas-obap20264-otellabs"
-GCP_REGION="us-central1"
+GCP_REGION="us-central1-a"
 CLUSTER_NAME="otel-lab"
 NAMESPACE="otel-lab"
 
@@ -58,17 +58,17 @@ setup_gke_cluster() {
   gcloud config set project $GCP_PROJECT
 
   if gcloud container clusters describe $CLUSTER_NAME \
-     --region=$GCP_REGION &>/dev/null 2>&1; then
+     --zone=$GCP_REGION &>/dev/null 2>&1; then
     warn "Cluster $CLUSTER_NAME ya existe — conectando..."
   else
     log "Creando cluster GKE $CLUSTER_NAME..."
     gcloud container clusters create $CLUSTER_NAME \
-      --region=$GCP_REGION \
-      --num-nodes=2 \
+      --zone=$GCP_REGION \
+      --num-nodes=1 \
       --machine-type=e2-medium \
       --enable-autoscaling \
       --min-nodes=1 \
-      --max-nodes=3 \
+      --max-nodes=2 \
       --disk-size=30GB \
       --enable-network-policy \
       --workload-pool="${GCP_PROJECT}.svc.id.goog" \
@@ -78,7 +78,7 @@ setup_gke_cluster() {
 
   # Obtener credenciales
   gcloud container clusters get-credentials $CLUSTER_NAME \
-    --region=$GCP_REGION --project=$GCP_PROJECT
+    --zone=$GCP_REGION --project=$GCP_PROJECT
   ok "kubectl configurado para $CLUSTER_NAME"
 }
 

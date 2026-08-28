@@ -1,5 +1,6 @@
 #!/bin/bash
 # ════════════════════════════════════════════════════════════════
+export MSYS_NO_PATHCONV=1
 #
 # Instala y configura:
 #   1. GKE cluster (si no existe)
@@ -150,7 +151,7 @@ install_chaos_mesh() {
     helm upgrade chaos-mesh chaos-mesh/chaos-mesh \
       --namespace chaos-mesh \
       --set chaosDaemon.runtime=containerd \
-      --set chaosDaemon.socketPath=/run/containerd/containerd.sock \
+      --set "chaosDaemon.socketPath=/run/containerd/containerd.sock" \
       --set dashboard.securityMode=false \
       --set features.httpChaos.enabled=true
   else
@@ -158,7 +159,7 @@ install_chaos_mesh() {
       --namespace chaos-mesh \
       --create-namespace \
       --set chaosDaemon.runtime=containerd \
-      --set chaosDaemon.socketPath=/run/containerd/containerd.sock \
+      --set "chaosDaemon.socketPath=/run/containerd/containerd.sock" \
       --set dashboard.securityMode=false \
       --set features.httpChaos.enabled=true \
       --wait --timeout=5m

@@ -70,7 +70,7 @@ data:
             key: cloud.project
             value: ${env:GCP_PROJECT_ID}
       resourcedetection:
-        detectors: [env, gcp, k8s_node]
+        detectors: [env, gcp]
         timeout: 10s
         override: false
       filter/health:

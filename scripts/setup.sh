@@ -64,11 +64,11 @@ setup_gke_cluster() {
     log "Creando cluster GKE $CLUSTER_NAME..."
     gcloud container clusters create $CLUSTER_NAME \
       --zone=$GCP_REGION \
-      --num-nodes=1 \
-      --machine-type=e2-medium \
+      --num-nodes=3 \
+      --machine-type=e2-standard-4 \
       --enable-autoscaling \
       --min-nodes=1 \
-      --max-nodes=2 \
+      --max-nodes=5 \
       --disk-size=30GB \
       --enable-network-policy \
       --workload-pool="${GCP_PROJECT}.svc.id.goog" \

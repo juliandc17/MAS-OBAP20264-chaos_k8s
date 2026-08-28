@@ -44,6 +44,7 @@ spec:
               mountPath: /docker-entrypoint-initdb.d
             - name: data
               mountPath: /var/lib/postgresql/data
+              subPath: postgres
           readinessProbe:
             exec:
               command: ["pg_isready", "-U", "app", "-d", "appdb"]
@@ -140,7 +141,7 @@ spec:
               mountPath: /conf
           resources:
             requests:
-              cpu: 100m
+              cpu: 50m
               memory: 200Mi
             limits:
               cpu: 500m
@@ -230,7 +231,7 @@ spec:
               value: "9064"
           resources:
             requests:
-              cpu: 100m
+              cpu: 50m
               memory: 128Mi
             limits:
               cpu: 500m
@@ -311,7 +312,7 @@ spec:
               value: "0"
           resources:
             requests:
-              cpu: 100m
+              cpu: 50m
               memory: 128Mi
             limits:
               cpu: 500m
@@ -379,7 +380,7 @@ spec:
               value: "9066"
           resources:
             requests:
-              cpu: 100m
+              cpu: 50m
               memory: 128Mi
             limits:
               cpu: 500m
@@ -443,7 +444,7 @@ spec:
               value: "100000"
           resources:
             requests:
-              cpu: 100m
+              cpu: 50m
               memory: 256Mi
             limits:
               cpu: 500m

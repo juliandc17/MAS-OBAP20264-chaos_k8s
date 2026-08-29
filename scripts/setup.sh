@@ -1,6 +1,5 @@
 #!/bin/bash
 # ════════════════════════════════════════════════════════════════
-export MSYS_NO_PATHCONV=1
 #
 # Instala y configura:
 #   1. GKE cluster (si no existe)
@@ -162,8 +161,10 @@ install_chaos_mesh() {
       --set "chaosDaemon.socketPath=/run/containerd/containerd.sock" \
       --set dashboard.securityMode=false \
       --set features.httpChaos.enabled=true \
-      --wait --timeout=5m
+
   fi
+  log "Esperando 3 minutos para que Chaos Mesh arranque..."
+  sleep 180
 
   ok "Chaos Mesh instalado"
 
@@ -240,13 +241,13 @@ install_litmus_chaos() {
 #     helm upgrade litmuschaos litmuschaos/litmus \
 #       --namespace litmus \
 #       --set portal.frontend.service.type=ClusterIP \
-#       --wait --timeout=5m
+# 
 #   else
 #     helm install litmuschaos litmuschaos/litmus \
 #       --namespace litmus \
 #       --create-namespace \
 #       --set portal.frontend.service.type=ClusterIP \
-#       --wait --timeout=5m
+# 
 #   fi
 
 #   ok "LitmusChaos instalado"
@@ -414,7 +415,7 @@ run_litmus_experiments() {
   echo -e "${CYAN}════════════════════════════════════════${NC}"
   echo ""
 
-  kubectl apply -f k8s/litmus/chaosengine-experiment-2.yaml
+  kubectl apply -f litmus/chaosengine-experiment-2.yaml
   ok "ChaosEngine aplicado"
 
   # Esperar resultado del ChaosEngine

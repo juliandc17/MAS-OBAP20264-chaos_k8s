@@ -74,7 +74,7 @@ spec:
           # Este probe es la medición del MTTD
           - name: error-rate-detected-during-chaos
             type: promProbe
-            mode: DuringChaos
+            mode: OnChaos
             promProbe/inputs:
               endpoint: "http://prometheus-svc:9090"
               query: |
@@ -93,7 +93,7 @@ spec:
           # Probe 3: Alerta de burn rate disparada
           - name: burn-rate-alert-active
             type: promProbe
-            mode: DuringChaos
+            mode: OnChaos
             promProbe/inputs:
               endpoint: "http://prometheus-svc:9090"
               query: |

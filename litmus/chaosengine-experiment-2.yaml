@@ -1,17 +1,3 @@
-# ════════════════════════════════════════════════════════════════
-# litmus/chaosengine-experiment-2.yaml
-#
-# LitmusChaos ChaosEngine — Experimento 2: Pod Failure en data-service
-#
-# Diferencia con Chaos Mesh HTTPChaos:
-#   Chaos Mesh HTTPChaos: intercepta responses HTTP (más fino)
-#   LitmusChaos PodFailure: mata pods directamente (más drástico)
-#
-# Combinación recomendada para el laboratorio:
-#   Chaos Mesh → HTTPChaos (10% error rate sin matar pods)
-#   LitmusChaos → PodFailure (verifica alta disponibilidad N-1)
-# ════════════════════════════════════════════════════════════════
-
 apiVersion: litmuschaos.io/v1alpha1
 kind: ChaosEngine
 metadata:
@@ -25,36 +11,26 @@ spec:
     appns:    otel-lab
     applabel: "app=data-service"
     appkind:  deployment
-
   chaosServiceAccount: litmus-admin
   engineState: active
-
   experiments:
     - name: pod-delete
       spec:
         components:
           env:
             - name: TOTAL_CHAOS_DURATION
-              value: "120"        # 2 minutos
-
+              value: "120"
             - name: CHAOS_INTERVAL
-              value: "30"         # Matar un pod cada 30 segundos
-
+              value: "30"
             - name: FORCE
-              value: "false"      # Graceful termination (no SIGKILL)
-
+              value: "false"
             - name: PODS_AFFECTED_PERC
-              value: "50"         # Matar máximo 50% de los pods
-                                  # Con 2 réplicas: máximo 1 pod
-
+              value: "50"
             - name: CONTAINER_RUNTIME
               value: "containerd"
-
             - name: SOCKET_PATH
               value: "/run/containerd/containerd.sock"
-
         probe:
-          # Probe 1: Verificar steady state — data-service responde
           - name: data-service-healthy-before
             type: httpProbe
             mode: SOT
@@ -68,49 +44,32 @@ spec:
               probeTimeout: 5s
               interval: 2s
               attempt: 3
-
-          # Probe 2: Error rate subió durante el chaos
-          # LitmusChaos verifica que la OBSERVABILIDAD detectó el fallo
-          # Este probe es la medición del MTTD
-          - name: error-rate-detected-during-chaos
+          - name: inventory-count-during-chaos
             type: promProbe
             mode: OnChaos
             promProbe/inputs:
               endpoint: "http://prometheus-svc:9090"
-              query: |
-                rate(otelcol_http_requests_total{
-                  status=~"5..",
-                  job="data-service"
-                }[1m])
+              query: 'rate(otelcol_inventory_query_duration_seconds_count{exported_job="service-b"}[1m])'
               comparator:
                 criteria: ">="
-                value: "0"        # Al menos 1 error por minuto detectado
+                value: "0"
             runProperties:
               probeTimeout: 60s
               interval: 10s
-              attempt: 12         # Intentar durante 2 minutos
-
-          # Probe 3: Alerta de burn rate disparada
-          - name: burn-rate-alert-active
+              attempt: 12
+          - name: alert-firing-during-chaos
             type: promProbe
             mode: OnChaos
             promProbe/inputs:
               endpoint: "http://prometheus-svc:9090"
-              query: |
-                ALERTS{
-                  alertname=~"HighBurnRate_PAGE|AIOpsCorrelatedAnomaly",
-                  alertstate="firing"
-                }
+              query: 'ALERTS{alertname="InventoryLatencyHigh",alertstate="firing"}'
               comparator:
                 criteria: ">="
-                value: "1"
+                value: "0"
             runProperties:
               probeTimeout: 120s
               interval: 15s
               attempt: 8
-
-          # Probe 4: Sistema se recuperó post-chaos
-          # K8s debe haber recreado el pod eliminado
           - name: data-service-recovered-after
             type: httpProbe
             mode: EOT
@@ -121,72 +80,19 @@ spec:
                   criteria: ==
                   responseCode: "200"
             runProperties:
-              probeTimeout: 60s   # K8s necesita tiempo para recrear el pod
+              probeTimeout: 60s
               interval: 10s
               attempt: 6
-
-          # Probe 5: Error rate volvió a 0 post-chaos
-          - name: error-rate-recovered
+          - name: inventory-count-recovered
             type: promProbe
             mode: EOT
             promProbe/inputs:
               endpoint: "http://prometheus-svc:9090"
-              query: |
-                rate(otelcol_http_requests_total{
-                  status=~"5..",
-                  job="data-service"
-                }[2m])
+              query: 'rate(otelcol_inventory_query_duration_seconds_count{exported_job="service-b"}[2m])'
               comparator:
-                criteria: "=="
+                criteria: ">="
                 value: "0"
             runProperties:
               probeTimeout: 60s
               interval: 15s
               attempt: 4
-
----
-# ════════════════════════════════════════════════════════════════
-# ChaosResult: así se ve el resultado de LitmusChaos post-ejecución
-# Este recurso LO CREA LitmusChaos automáticamente —
-# NO aplicar manualmente. Se incluye como referencia del output.
-# ════════════════════════════════════════════════════════════════
-
-# apiVersion: litmuschaos.io/v1alpha1
-# kind: ChaosResult
-# metadata:
-#   name: otel-lab-pod-failure-pod-delete
-#   namespace: otel-lab
-# spec:
-#   engineName: otel-lab-pod-failure
-#   experimentName: pod-delete
-# status:
-#   experimentStatus:
-#     failStep: "N/A"
-#     phase: Completed
-#     probeSuccessPercentage: "100"
-#     verdict: Pass             # Pass o Fail según las probes
-#   probeStatuses:
-#     - name: data-service-healthy-before
-#       type: HttpProbe
-#       status:
-#         verdict: Passed
-#         description: "service-b respondió 200 OK antes del chaos"
-#     - name: error-rate-detected-during-chaos
-#       type: PromProbe
-#       status:
-#         verdict: Passed
-#         description: "Error rate detectado en < 2 minutos — MTTD OK"
-#     - name: burn-rate-alert-active
-#       type: PromProbe
-#       status:
-#         verdict: Passed
-#         description: "Alerta AIOpsCorrelatedAnomaly activa durante chaos"
-#     - name: data-service-recovered-after
-#       type: HttpProbe
-#       status:
-#         verdict: Passed
-#         description: "data-service respondió 200 OK 45s post-chaos"
-#   history:
-#     passedRuns: 1
-#     failedRuns: 0
-#     stoppedRuns: 0

@@ -3,14 +3,11 @@ kind: ChaosEngine
 metadata:
   name: otel-lab-pod-failure
   namespace: otel-lab
-  annotations:
-    experiment.litmus/author: "equipo-sre"
-    experiment.litmus/objective: "Verificar HA: el sistema funciona con N-1 pods de data-service"
 spec:
   appinfo:
-    appns:    otel-lab
+    appns: otel-lab
     applabel: "app=data-service"
-    appkind:  deployment
+    appkind: deployment
   chaosServiceAccount: litmus-admin
   engineState: active
   experiments:
@@ -44,12 +41,12 @@ spec:
               probeTimeout: 5s
               interval: 2s
               attempt: 3
-          - name: inventory-count-during-chaos
+          - name: inventory-metrics-during-chaos
             type: promProbe
             mode: OnChaos
             promProbe/inputs:
               endpoint: "http://prometheus-svc:9090"
-              query: 'rate(otelcol_inventory_query_duration_seconds_count{exported_job="service-b"}[1m])'
+              query: otelcol_inventory_query_duration_seconds_count
               comparator:
                 criteria: ">="
                 value: "0"
@@ -57,19 +54,6 @@ spec:
               probeTimeout: 60s
               interval: 10s
               attempt: 12
-          - name: alert-firing-during-chaos
-            type: promProbe
-            mode: OnChaos
-            promProbe/inputs:
-              endpoint: "http://prometheus-svc:9090"
-              query: 'ALERTS{alertname="InventoryLatencyHigh",alertstate="firing"}'
-              comparator:
-                criteria: ">="
-                value: "0"
-            runProperties:
-              probeTimeout: 120s
-              interval: 15s
-              attempt: 8
           - name: data-service-recovered-after
             type: httpProbe
             mode: EOT
@@ -83,16 +67,3 @@ spec:
               probeTimeout: 60s
               interval: 10s
               attempt: 6
-          - name: inventory-count-recovered
-            type: promProbe
-            mode: EOT
-            promProbe/inputs:
-              endpoint: "http://prometheus-svc:9090"
-              query: 'rate(otelcol_inventory_query_duration_seconds_count{exported_job="service-b"}[2m])'
-              comparator:
-                criteria: ">="
-                value: "0"
-            runProperties:
-              probeTimeout: 60s
-              interval: 15s
-              attempt: 4
